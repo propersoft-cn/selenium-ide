@@ -77,6 +77,10 @@ program
     'Format for the output. (default: jest)'
   )
   .option(
+    '--output-html [true | false]',
+    'Generate html report. (default: false)'
+  )
+  .option(
     '--force',
     "Forcibly run the project, regardless of project's version"
   )
@@ -189,6 +193,16 @@ configuration.outputFormat = () => ({
   jestConfiguration: {},
   packageJsonConfiguration: {},
 })
+
+configuration.outputHtml = program.outputHtml
+? { reporters: [
+  ["jest-html-reporters", {
+  "publicPath": `${outputDirectory}/html-report`,
+  "filename": `${project.name}.html`,
+  "expand": true
+  }]] }
+: {}
+
 if (program.outputDirectory) {
   const outputDirectory = path.isAbsolute(program.outputDirectory)
     ? program.outputDirectory
@@ -280,6 +294,7 @@ function runProject(project) {
           testEnvironment: 'jest-environment-selenium',
           testEnvironmentOptions: configuration,
           ...configuration.outputFormat(project).jestConfiguration,
+          ...configuration.outputHtml,
         },
         ...configuration.outputFormat(project).packageJsonConfiguration,
         dependencies: project.dependencies,
